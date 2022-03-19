@@ -36,6 +36,28 @@ fn test_buy_kitty() {
 		assert_ok!(KittiesModule::buy_kitty(Origin::signed(2), kitty_hash, 1_000_000u128));
 	});
 }
+#[test]
+fn test_breed_kitty() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		// Dispatch a signed extrinsic.
+		let _ = KittiesModule::create_kitty(Origin::signed(1));
+		System::set_block_number(2);
+		let _ = KittiesModule::create_kitty(Origin::signed(1));
+		let kitty_hashes = KittiesModule::kitties_owned(1);
+		assert_ok!(KittiesModule::breed_kitty(Origin::signed(1), kitty_hashes[0], kitty_hashes[1]));
+	});
+}
+#[test]
+fn test_set_price_kitty() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		// Dispatch a signed extrinsic.
+		let _ = KittiesModule::create_kitty(Origin::signed(1));
+		let kitty_hash = KittiesModule::kitties_owned(1)[0];
+		assert_ok!(KittiesModule::set_price(Origin::signed(1), kitty_hash, Some(1_000_000u128)));
+	});
+}
 
 // #[test]
 // fn test_buy_kitty() {
