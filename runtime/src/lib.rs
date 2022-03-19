@@ -5,7 +5,6 @@
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
-
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -34,14 +33,13 @@ pub use frame_support::{
 	StorageValue,
 };
 pub use pallet_balances::Call as BalancesCall;
+/// Import the template pallet.
+pub use pallet_kitties;
 pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
-
-/// Import the template pallet.
-pub use pallet_kitties;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -280,6 +278,7 @@ impl pallet_kitties::Config for Runtime {
 	type MaxKittyOwned = MaxKittyOwned;
 	type Timestamp = Timestamp;
 	type Moment = Moment;
+	type WeightInfo = pallet_kitties::weights::WeightInfo<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -341,7 +340,7 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_template, TemplateModule]
+		[pallet_kitties, SubstrateKitties]
 	);
 }
 
@@ -486,7 +485,6 @@ impl_runtime_apis! {
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
-
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmarks!(list, extra);
 

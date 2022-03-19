@@ -1,9 +1,21 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
+// #[cfg(feature = "bench-marking")]
 
+#[cfg(test)]
+pub mod tests;
+
+#[cfg(test)]
+pub mod mock;
+
+#[cfg(feature = "runtime-benchmarks")]
+pub mod benchmarking;
+
+pub mod weights;
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_support::{
 		sp_runtime::traits::{Hash, Scale},
@@ -67,6 +79,7 @@ pub mod pallet {
 			+ MaxEncodedLen
 			+ StaticTypeInfo;
 		type Timestamp: Time<Moment = Self::Moment>;
+		type WeightInfo: weights::KittiesWeightInfo;
 	}
 
 	// Errors.
