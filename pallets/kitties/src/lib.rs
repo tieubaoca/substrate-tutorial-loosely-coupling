@@ -1,10 +1,21 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
+#[cfg(feature = "runtime-benchmarks")]
+pub mod benchmarking;
 
+#[cfg(test)]
+pub mod tests;
+
+#[cfg(test)]
+pub mod mock;
+pub mod weights;
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::pallet_prelude::*;
+	#[cfg(feature = "std")]
+	use frame_support::serde::{Deserialize, Serialize};
 	use frame_support::{
 		sp_runtime::traits::{Hash, Scale},
 		traits::{tokens::ExistenceRequirement, Currency, Randomness, Time},
@@ -13,9 +24,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use scale_info::{StaticTypeInfo, TypeInfo};
 	use sp_io::hashing::blake2_128;
-
-	#[cfg(feature = "std")]
-	use frame_support::serde::{Deserialize, Serialize};
+	use weights::WeightInfo;
 
 	type AccountOf<T> = <T as frame_system::Config>::AccountId;
 	type BalanceOf<T> =
@@ -67,6 +76,7 @@ pub mod pallet {
 			+ MaxEncodedLen
 			+ StaticTypeInfo;
 		type Timestamp: Time<Moment = Self::Moment>;
+		type WeightInfo: WeightInfo;
 	}
 
 	// Errors.
@@ -166,7 +176,7 @@ pub mod pallet {
 		/// Create a new unique kitty.
 		///
 		/// The actual kitty creation is done in the `mint()` function.
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::create_kitty())]
 		pub fn create_kitty(origin: OriginFor<T>) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 			// let time: T::Moment = T::Timestamp::now().try_into().unwrap();
@@ -182,7 +192,7 @@ pub mod pallet {
 		/// Set the price for a Kitty.
 		///
 		/// Updates Kitty price and updates storage.
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::set_price())]
 		pub fn set_price(
 			origin: OriginFor<T>,
 			kitty_id: T::Hash,
@@ -208,7 +218,7 @@ pub mod pallet {
 		///
 		/// Any account that holds a kitty can send it to another Account. This will reset the asking
 		/// price of the kitty, marking it not for sale.
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			to: T::AccountId,
