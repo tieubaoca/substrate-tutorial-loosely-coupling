@@ -252,7 +252,7 @@ pub mod pallet {
 		/// This will reset the asking price of the kitty, marking it not for sale.
 		/// Marking this method `transactional` so when an error is returned, we ensure no storage is changed.
 		#[transactional]
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::buy_kitty())]
 		pub fn buy_kitty(
 			origin: OriginFor<T>,
 			kitty_id: T::Hash,
@@ -298,7 +298,7 @@ pub mod pallet {
 		///
 		/// Breed two kitties to create a new generation
 		/// of Kitties.
-		#[pallet::weight(100)]
+		#[pallet::weight(T::WeightInfo::breed_kitty())]
 		pub fn breed_kitty(
 			origin: OriginFor<T>,
 			parent1: T::Hash,

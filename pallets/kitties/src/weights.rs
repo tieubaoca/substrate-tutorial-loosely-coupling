@@ -36,6 +36,8 @@ pub trait WeightInfo {
 	 fn create_kitty() -> Weight;
 	 fn set_price() -> Weight;
 	 fn transfer( ) -> Weight;
+	 fn buy_kitty() -> Weight;
+	 fn breed_kitty() -> Weight;
 }
 /// Weight functions for `pallet_kitties`.
 pub struct KittiesWeightInfo<T>(PhantomData<T>);
@@ -64,6 +66,27 @@ impl<T: frame_system::Config> WeightInfo for KittiesWeightInfo<T> {
 	fn transfer( ) -> Weight {
 		(34_153_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(3 as Weight))
+			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+	}
+		// Storage: SubstrateKitties Kitties (r:1 w:1)
+	// Storage: System Account (r:1 w:0)
+	// Storage: SubstrateKitties KittiesOwned (r:2 w:2)
+	fn buy_kitty() -> Weight {
+		(68_100_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(4 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	// Storage: SubstrateKitties Kitties (r:3 w:1)
+	// Storage: RandomnessCollectiveFlip RandomMaterial (r:1 w:0)
+	// Storage: unknown [0x3a65787472696e7369635f696e646578] (r:1 w:0)
+	// Storage: Timestamp Now (r:1 w:0)
+	// Storage: SubstrateKitties KittyCnt (r:1 w:1)
+	// Storage: SubstrateKitties KittiesOwned (r:1 w:1)
+	fn breed_kitty() -> Weight {
+		(52_030_000 as Weight)
+			// Standard Error: 2_000
+			// .saturating_add((12_000 as Weight).saturating_mul(s as Weight))
+			.saturating_add(T::DbWeight::get().reads(8 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
 	}
 }
