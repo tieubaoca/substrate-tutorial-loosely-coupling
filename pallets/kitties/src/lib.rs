@@ -14,8 +14,6 @@ pub mod weights;
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
-	#[cfg(feature = "std")]
-	use frame_support::serde::{Deserialize, Serialize};
 	use frame_support::{
 		sp_runtime::traits::{Hash, Scale},
 		traits::{tokens::ExistenceRequirement, Currency, Randomness, Time},
@@ -23,7 +21,16 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::{StaticTypeInfo, TypeInfo};
+	#[cfg(feature = "std")]
+	use serde::{Deserialize, Serialize};
 	use sp_io::hashing::blake2_128;
+	#[cfg(feature = "std")]
+	use sp_runtime::{
+		traits::MaybeSerializeDeserialize, Deserialize as RuntimeDeserialize,
+		DeserializeOwned as RuntimeDeserializeOwned, RuntimeDebug, Serialize as RuntimeSerialize,
+	};
+	#[cfg(feature = "std")]
+	use std::marker::Send;
 	use weights::WeightInfo;
 
 	type AccountOf<T> = <T as frame_system::Config>::AccountId;
@@ -31,9 +38,22 @@ pub mod pallet {
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 	// Struct for holding Kitty information.
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+	// #[derive(
+	// 	Clone,
+	// 	Encode,
+	// 	Decode,
+	// 	PartialEq,
+	// 	RuntimeDebug,
+	// 	TypeInfo,
+	// 	MaxEncodedLen,
+	// 	Deserialize,
+	// 	Serialize,
+	// )]
+	#[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, RuntimeDebug)]
+	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	#[scale_info(skip_type_params(T))]
 	#[codec(mel_bound())]
+
 	pub struct Kitty<T: Config> {
 		pub dna: [u8; 16], // Using 16 bytes to represent a kitty DNA
 		pub price: Option<BalanceOf<T>>,
@@ -61,7 +81,7 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// The Currency handler for the Kitties pallet.
-		type Currency: Currency<Self::AccountId>;
+		type Currency: Currency<Self::AccountId> + Send;
 
 		/// The maximum amount of Kitties a single account can own.
 		#[pallet::constant]
@@ -74,7 +94,10 @@ pub mod pallet {
 			+ Scale<Self::BlockNumber, Output = Self::Moment>
 			+ Copy
 			+ MaxEncodedLen
-			+ StaticTypeInfo;
+			+ StaticTypeInfo
+			+ MaybeSerializeDeserialize
+			+ Send;
+		// + RuntimeDeserialize;
 		type Timestamp: Time<Moment = Self::Moment>;
 		type WeightInfo: WeightInfo;
 	}
