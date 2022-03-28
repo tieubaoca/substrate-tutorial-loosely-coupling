@@ -477,6 +477,12 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_kitties_rpc_runtime_api::KittiesApi<Block> for Runtime{
+		fn query_kitty_count() -> u64 {
+			SubstrateKitties::kitty_cnt()
+		}
+	}
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (

@@ -3622,6 +3622,7 @@ dependencies = [
  "pallet-balances",
  "pallet-grandpa",
  "pallet-kitties",
+ "pallet-kitties-rpc-runtime-api",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-timestamp",

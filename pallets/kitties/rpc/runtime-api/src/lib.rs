@@ -25,10 +25,10 @@
 pub use pallet_kitties::pallet::{Config, Kitty, Pallet};
 
 sp_api::decl_runtime_apis! {
-	pub trait KittiesApi<T>
-	where T: Config
+	pub trait KittiesApi
 	{
-		fn kitty_info() -> Kitty<T>;
+		fn query_kitty_count() -> u64;
+		// fn kitty_info() -> Kitty<T>;
 		// fn kitty_info() -> Kitty<T>;
 		// fn query_fee_details(uxt: Block::Extrinsic, len: u32) -> FeeDetails<Balance>;
 	}

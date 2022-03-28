@@ -33,12 +33,11 @@ use sp_runtime::{
 use std::sync::Arc;
 
 #[rpc]
-pub trait KittiesApi<BlockHash, Config>
-where
-	Config: KittiesConfig,
-{
-	#[rpc(name = "payment_queryInfo")]
-	fn query_kitty(&self) -> Result<Kitty<Config>>;
+pub trait KittiesApi<BlockHash> {
+	// #[rpc(name = "payment_queryInfo")]
+	// fn query_kitty(&self) -> Result<Kitty<Config>>;
+	#[rpc(name = "kitties_queryKittyCount")]
+	fn query_kitty_count(&self, at: Option<BlockHash>) -> Result<u64>;
 }
 
 /// A struct that implements the [`TransactionPaymentApi`].
@@ -71,30 +70,42 @@ impl From<Error> for i64 {
 	}
 }
 
-impl<C, Block, Config> KittiesApi<<Block as BlockT>::Hash, Config> for Kitties<C, Block>
+impl<C, Block> KittiesApi<<Block as BlockT>::Hash> for Kitties<C, Block>
 where
 	Block: BlockT,
 	C: 'static + ProvideRuntimeApi<Block> + HeaderBackend<Block>,
-	C::Api: KittiesRuntimeApi<Block, Config>,
-	Config: KittiesConfig,
+	C::Api: KittiesRuntimeApi<Block>,
 {
-	fn query_kitty(&self) -> Result<Kitty<Config>> {
+	fn query_kitty_count(&self, at: Option<<Block as BlockT>::Hash>) -> Result<u64> {
 		let api = self.client.runtime_api();
-		// let at = BlockId::hash(at.unwrap_or_else(||
-		// 	// If the block hash is not supplied assume the best block.
-		// 	self.client.info().best_hash));
+		let at = BlockId::hash(at.unwrap_or_else(||
+			// If the block hash is not supplied assume the best block.
+			self.client.info().best_hash));
 
-		// let encoded_len = encoded_xt.len() as u32;
-
-		// let uxt: Block::Extrinsic = Decode::decode(&mut &*encoded_xt).map_err(|e| RpcError {
-		// 	code: ErrorCode::ServerError(Error::DecodeError.into()),
-		// 	message: "Unable to query dispatch info.".into(),
-		// 	data: Some(format!("{:?}", e).into()),
-		// })?;
-		api.query_kitty().map_err(|e| RpcError {
+		let result = api.query_kitty_count(&at);
+		result.map_err(|e| RpcError {
 			code: ErrorCode::ServerError(Error::RuntimeError.into()),
 			message: "Unable to query dispatch info.".into(),
 			data: Some(e.to_string().into()),
 		})
 	}
+	// fn query_kitty(&self) -> Result<Kitty<Config>> {
+	// 	let api = self.client.runtime_api();
+	// 	// let at = BlockId::hash(at.unwrap_or_else(||
+	// 	// 	// If the block hash is not supplied assume the best block.
+	// 	// 	self.client.info().best_hash));
+
+	// 	// let encoded_len = encoded_xt.len() as u32;
+
+	// 	// let uxt: Block::Extrinsic = Decode::decode(&mut &*encoded_xt).map_err(|e| RpcError {
+	// 	// 	code: ErrorCode::ServerError(Error::DecodeError.into()),
+	// 	// 	message: "Unable to query dispatch info.".into(),
+	// 	// 	data: Some(format!("{:?}", e).into()),
+	// 	// })?;
+	// 	api.query_kitty().map_err(|e| RpcError {
+	// 		code: ErrorCode::ServerError(Error::RuntimeError.into()),
+	// 		message: "Unable to query dispatch info.".into(),
+	// 		data: Some(e.to_string().into()),
+	// 	})
+	// }
 }
